@@ -1,98 +1,75 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView } from "react-native";
+import { Image } from "expo-image";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
+import useTheme from "@/hooks/use-theme";
+import BrandLogo from "@/components/screens/main/brand-logo";
+import CarBrands from "@/components/screens/main/car-brands";
+import { useAvatarStore } from "@/store/use-avatar.state";
+import { useEffect } from "react";
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const { colorScheme } = useTheme();
+  const isDark = colorScheme === "dark";
+  const { avatar, loadAvatar } = useAvatarStore();
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  useEffect(() => {
+    loadAvatar();
+  }, [loadAvatar]);
+
+  return (
+    <SafeAreaView className={`flex-1 ${isDark ? "bg-gray-900" : "bg-white"}`}>
+      <ScrollView className="flex-1">
+        {/* Header */}
+        <View className={`${isDark ? "bg-gray-900" : "bg-white"} px-5 pt-2 pb-5`}>
+          <View className="flex-row justify-between items-center">
+            <View className="flex-row items-center">
+              <View className="bg-yellow-400 p-2.5 rounded-full mr-3">
+                <Ionicons name="location" size={18} color="white" />
+              </View>
+              <View>
+                <Text className={`${isDark ? "text-gray-400" : "text-gray-500"} text-xs`}>Your location</Text>
+                <View className="flex-row items-center">
+                  <Text className={`${isDark ? "text-white" : "text-black"} font-bold text-base`}>Ngangphaf,Selman</Text>
+                  <MaterialIcons name="keyboard-arrow-down" size={20} color={isDark ? "white" : "black"} />
+                </View>
+              </View>
+            </View>
+            <Image
+              key={avatar || 'default'}
+              source={avatar ? { uri: avatar } : require("@/assets/images/profile.png")}
+              className="w-20 h-20 rounded-full"
+              contentFit="cover"
+              cachePolicy="none"
+            />
+          </View>
+        </View>
+
+        <View className="px-5">
+          {/* Title */}
+          <Text className={`text-3xl font-bold ${isDark ? "text-white" : "text-gray-900"} mt-6 leading-tight`}>
+            Find your favourite{"\n"}vechicle.
+          </Text>
+
+          {/* Search Bar */}
+          <View className={`${isDark ? "bg-gray-800" : "bg-gray-50"} flex-row items-center px-5 py-4 rounded-full mt-6`} style={{shadowColor: "#000", shadowOffset: {width: 0, height: 1}, shadowOpacity: 0.05, shadowRadius: 2, elevation: 1}}>
+            <Ionicons name="search" size={22} color="#6B7280" />
+            <TextInput
+              placeholder="Search vechicle"
+              placeholderTextColor="#9CA3AF"
+              className={`flex-1 ml-3 text-base ${isDark ? "text-gray-200" : "text-gray-700"}`}
+            />
+          </View>
+
+          {/* Top Brands */}
+          <BrandLogo />
+
+          {/* Available Near You */}
+          <CarBrands />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
