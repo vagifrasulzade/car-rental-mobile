@@ -49,7 +49,7 @@ export default function CarBrands() {
       }}
     >
       <Image
-        source={{ uri: item.image }}
+        source={{ uri: (item as any).images?.[1] || item.image }}
         className="h-44 w-full rounded-t-3xl"
         contentFit="cover"
       />

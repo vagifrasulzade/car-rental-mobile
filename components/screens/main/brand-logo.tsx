@@ -33,7 +33,7 @@ export default function BrandLogo() {
                 }}
             >
                 <Image
-                    source={{ uri: item.image.source }}
+                    source={{ uri: item.image.thumb || item.image.optimized || item.image.source }}
                     className="h-full w-full rounded-[12px]"
                     contentFit="contain"
                 />

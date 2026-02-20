@@ -9,6 +9,7 @@ import { useState, useEffect } from "react";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
 import * as Device from "expo-device";
+import { useAddBookingStore } from "@/store/use-add-booking";
 
 const { width, height } = Dimensions.get('window');
 
@@ -16,6 +17,7 @@ export default function BookingOverviewPage() {
     const { colorScheme } = useTheme();
     const { id, startDate, endDate, pickupTime, returnTime, withDriver } = useLocalSearchParams();
     const router = useRouter();
+    const { setBookingDetails } = useAddBookingStore();
     const [selectedPayment, setSelectedPayment] = useState("mastercard");
     const [location, setLocation] = useState<Location.LocationObject | null>(null);
     const [search, setSearch] = useState<string | null>(null);
@@ -140,9 +142,33 @@ export default function BookingOverviewPage() {
     }
 
     const handlePayment = () => {
-        // Handle payment logic
-        console.log("Processing payment...");
-        // Navigate to success screen or payment gateway
+        if (!car) return;
+
+        const totalPrice = car.pricePerDay * numberOfDays;
+        const totalPriceWithTax = totalPrice * (1 + 0.18); // 18% tax
+
+        setBookingDetails({
+            carId: Array.isArray(id) ? id[0] : id,
+            startDate: Array.isArray(startDate) ? startDate[0] : startDate,
+            endDate: Array.isArray(endDate) ? endDate[0] : endDate,
+            pickupTime: Array.isArray(pickupTime) ? pickupTime[0] : (pickupTime as string) || "",
+            returnTime: Array.isArray(returnTime) ? returnTime[0] : (returnTime as string) || "",
+            withDriver: withDriver === "true",
+            numberOfDays,
+            pricePerDay: car.pricePerDay,
+            totalPrice,
+            totalPriceWithTax,
+            pickupLocationName: searchedLocation ? (search || "Selected Location") : "Current Location",
+            pickupLocationCoords: searchedLocation
+                ? searchedLocation
+                : location
+                    ? { latitude: location.coords.latitude, longitude: location.coords.longitude }
+                    : null,
+            selectedPaymentMethod: "mastercard",
+            selectedCardLast4: "4567 5485",
+        });
+
+        router.push("/payment/page" as any);
     };
 
     return (
@@ -318,7 +344,7 @@ export default function BookingOverviewPage() {
                     </View>
 
                     {/* Payment Section */}
-                    <View className="px-4 mt-6 pb-32">
+                    {/* <View className="px-4 mt-6 pb-32">
                         <Text className={`text-xl font-bold mb-4 ${colorScheme === "dark" ? "text-white" : "text-gray-900"}`}>
                             Payment
                         </Text>
@@ -343,7 +369,7 @@ export default function BookingOverviewPage() {
                                 <Ionicons name="chevron-forward" size={20} color={colorScheme === "dark" ? "#fff" : "#000"} />
                             </View>
                         </TouchableOpacity>
-                    </View>
+                    </View> */}
                 </ScrollView>
 
                 <View className={`absolute bottom-0 left-0 right-0 p-4 ${colorScheme === "dark" ? "bg-gray-900" : "bg-white"} border-t ${colorScheme === "dark" ? "border-gray-800" : "border-gray-200"}`}>
